@@ -12,6 +12,7 @@
 
 
 # Links
+* [Требования к ВКР](https://mipt.ru/docs/download.php?code=prikaz_ob_utverzhdenii_polozheniya_o_vypusknoy_kvalikafitsionnoy_rabote_studentov_mfti_49_1_ot_21_01)
 * https://scholar.google.com/ search for gesture recognition (survey какой-нибудь).
 * https://paperswithcode.com/ - тут есть датасеты
 

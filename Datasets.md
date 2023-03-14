@@ -7,3 +7,6 @@
 |WLASL|en(us)|gloss|recognition|21k videos|
 |MS-ASL|en(us)|gloss|recognition|25.5k videos|
 |BSL1k|en(gb)|gloss|recognition|273k videos|
+
+# Русский жестовый
+Корпус РЖЯ НГТУ http://rsl.nstu.ru/ (С.И. Буркова)
