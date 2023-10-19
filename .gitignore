@@ -1,2 +1,4 @@
 *.log
 ~*
+*checkpoints
+code/logs/
