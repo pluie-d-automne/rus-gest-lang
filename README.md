@@ -3,6 +3,10 @@
 |Дата|Задача|
 |---|---|
 
+Tutorials:
+* https://www.tensorflow.org/tutorials/video/transfer_learning_with_movinet
+* https://www.tensorflow.org/tutorials/video/video_classification
+
 
 # Текущие задачи
 
