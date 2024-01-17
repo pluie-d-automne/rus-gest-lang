@@ -28,14 +28,7 @@ class VideoDataset(Dataset):
         self.top_k = 5000
         self.scale = 1
         self.face_detection_model = face_detection_model
-        self.detector = cv2.FaceDetectorYN.create(
-                  self.face_detection_model,
-                  "",
-                  (320, 320),
-                  self.score_threshold,
-                  self.nms_threshold,
-                  self.top_k
-              )
+        
 
         for i in video_labels[video_labels.dataset==ds_type].index:
           frames, label = self.get_video_and_label(i)
@@ -57,6 +50,14 @@ class VideoDataset(Dataset):
 
 
     def crop_coordinates(self, image):
+      detector = cv2.FaceDetectorYN.create(
+                  self.face_detection_model,
+                  "",
+                  (320, 320),
+                  self.score_threshold,
+                  self.nms_threshold,
+                  self.top_k
+              )
       shape = image.shape
       mp_face = mp.solutions.face_mesh
       with mp_face.FaceMesh(static_image_mode=True,
@@ -80,8 +81,8 @@ class VideoDataset(Dataset):
 
           tm = cv2.TickMeter()
           tm.start()
-          self.detector.setInputSize((img1Width, img1Height))
-          faces1 = self.detector.detect(image)
+          detector.setInputSize((img1Width, img1Height))
+          faces1 = detector.detect(image)
           tm.stop()
           if faces1[1] is not None:
             face_height = faces1[1][0][3]
