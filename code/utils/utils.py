@@ -184,7 +184,7 @@ def validate_model(model, classes, epoch, criterion, optimizer, val_dataloader, 
         correct += (pred == target.item()).sum().float()
         total += len(target)
         predict_acc = correct / total
-    if save and predict_acc > best_acc:
+    if save and predict_acc >= best_acc:
         best_acc = predict_acc if predict_acc > best_acc else best_acc
         torch.save({
                     'epoch': epoch,
@@ -244,7 +244,7 @@ def display_learning_dynamic(train_loss_dynamic, val_accuracy_dynamic, epochs, m
 
     plt.show()
     
-def classification_model_metrics(model, classes, dataloader, device):
+def classification_model_metrics(model, classes, dataloader, device, hm=True):
     TP={i:0 for i in range(len(classes))}
     FN={i:0 for i in range(len(classes))}
     FP={i:0 for i in range(len(classes))}
@@ -267,13 +267,14 @@ def classification_model_metrics(model, classes, dataloader, device):
         actual.append(class_id)
         predicted.append(prediction)
     accuracy = sum(TP.values())/sum(total.values())
-    precision = np.mean([TP[i]/(TP[i]+FP[i]) for i in total.keys()])
-    recall = np.mean([TP[i]/(TP[i]+FN[i]) for i in total.keys()])
-    F1 = (2*precision*recall)/(precision+recall)
+    precision = np.mean([TP[i]/((TP[i]+FP[i]) or 1) for i in total.keys()])
+    recall = np.mean([TP[i]/((TP[i]+FN[i]) or 1) for i in total.keys()])
+    F1 = (2*precision*recall)/((precision+recall) or 1)
     cm = confusion_matrix(actual,predicted)
-    sns.heatmap(cm,  annot=True, fmt='g', cmap=sns.color_palette("Blues", as_cmap=True))
-    plt.ylabel('Prediction',fontsize=13)
-    plt.xlabel('Actual',fontsize=13)
-    plt.title('Confusion Matrix',fontsize=17)
-    plt.show()
+    if hm:
+        sns.heatmap(cm,  annot=True, fmt='g', cmap=sns.color_palette("Blues", as_cmap=True))
+        plt.ylabel('Prediction',fontsize=13)
+        plt.xlabel('Actual',fontsize=13)
+        plt.title('Confusion Matrix',fontsize=17)
+        plt.show()
     print(f'Accuracy={accuracy}; Precision={precision}; Recall={recall}; F1={F1}')
