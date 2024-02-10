@@ -190,9 +190,10 @@ def validate_model(model, classes, epoch, criterion, optimizer, val_dataloader, 
                     'epoch': epoch,
                     'model_state_dict': model.state_dict(),
                     'optimizer_state_dict': optimizer.state_dict(),
-                    'classes': classes
+                    'classes': classes,
+                    'epoch':epoch
                 },
-                    f'{save_path}/{model_name}-{epoch}-Val_acc-{predict_acc:.3f}.pth')
+                    f'{save_path}/{model_name}-Val_acc-{predict_acc:.3f}.pth')
     return predict_acc, best_acc
     
 def train_model(model, optimizer, criterion, train_dataloader, device, scheduler=None):
@@ -208,8 +209,8 @@ def train_model(model, optimizer, criterion, train_dataloader, device, scheduler
         optimizer.step()
         total_loss.append(loss.item())
         #pbar.set_description(f'Train Epoch:{epoch}/{epoches} train_loss:{round(np.mean(total_loss), 4)}')
-        if scheduler is not None:
-            scheduler.step()
+    if scheduler is not None:
+        scheduler.step()
     return round(np.mean(total_loss), 4)
             
 
