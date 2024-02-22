@@ -195,6 +195,33 @@ def validate_model(model, classes, epoch, criterion, optimizer, val_dataloader, 
                 },
                     f'{save_path}/{model_name}-Val_acc-{predict_acc:.3f}.pth')
     return predict_acc, best_acc
+  
+def validate_model_batched(model, classes, epoch, criterion, optimizer, val_dataloader, device, best_acc, save=True, save_path=None, model_name=None):
+    test_loss = list()
+    correct=0
+    total=0
+    model.eval()
+    for data, target in val_dataloader:
+        data, target = data.to(device), target.to(device)
+        with torch.no_grad():
+            output = model(data/255)
+        loss = criterion(output, target)
+        test_loss.append(loss)
+        pred = torch.argmax(output, 1)
+        correct += (pred == target).sum().float()
+        total += len(target)
+        predict_acc = correct / total
+    if save and predict_acc >= best_acc:
+        best_acc = predict_acc if predict_acc > best_acc else best_acc
+        torch.save({
+                    'epoch': epoch,
+                    'model_state_dict': model.state_dict(),
+                    'optimizer_state_dict': optimizer.state_dict(),
+                    'classes': classes,
+                    'epoch':epoch
+                },
+                    f'{save_path}/{model_name}-Val_acc-{predict_acc:.3f}.pth')
+    return predict_acc, best_acc
     
 def train_model(model, optimizer, criterion, train_dataloader, device, scheduler=None):
     #import tqdm
