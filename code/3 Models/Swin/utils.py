@@ -313,7 +313,7 @@ def draw_dynamic(data, batch_sizes, n_classes, model_folder, model_name, type = 
   title_dict = {'val_accuracy_dynamic': 'Accuracy dynamic',
                 'train_loss_dynamic': 'Train Loss dynamic'}
 
-  fig, (ax0, ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=4, sharex=True, figsize=(24, 4))
+  fig, (ax0, ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=4, sharex=True, figsize=(24, 4), sharey=True)
 
   ax0.set_title(f"batch_size = {batch_sizes[0]}")
   ax1.set_title(f"batch_size = {batch_sizes[1]}")
