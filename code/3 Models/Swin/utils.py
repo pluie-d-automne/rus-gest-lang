@@ -6,6 +6,7 @@ import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix
+import json
 
 import torch
 from torch.utils.data import Dataset
@@ -306,3 +307,35 @@ def classification_model_metrics(model, classes, dataloader, device, hm=True):
         plt.title('Confusion Matrix',fontsize=17)
         plt.show()
     print(f'Accuracy={accuracy}; Precision={precision}; Recall={recall}; F1={F1}')
+
+def draw_dynamic(data, batch_sizes, n_classes, model_folder, model_name, type = 'val_accuracy_dynamic'):
+  x = np.arange(1, 31, 1)
+  title_dict = {'val_accuracy_dynamic': 'Accuracy dynamic',
+                'train_loss_dynamic': 'Train Loss dynamic'}
+
+  fig, (ax0, ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=4, sharex=True, figsize=(24, 4))
+
+  ax0.set_title(f"batch_size = {batch_sizes[0]}")
+  ax1.set_title(f"batch_size = {batch_sizes[1]}")
+  ax2.set_title(f"batch_size = {batch_sizes[2]}")
+  ax3.set_title(f"batch_size = {batch_sizes[3]}")
+
+
+  for example in data:
+    with open(model_folder + example['filename'], 'r') as f:
+      dynamic = json.load(f)
+      if example['bs'] == batch_sizes[0]:
+        ax0.plot(x, dynamic[type], label = f"lr={example['lr']}")
+      elif example['bs'] == batch_sizes[1]:
+        ax1.plot(x, dynamic[type], label = f"lr={example['lr']}")
+      elif example['bs'] == batch_sizes[2]:
+        ax2.plot(x, dynamic[type], label = f"lr={example['lr']}")
+      elif example['bs'] == batch_sizes[3]:
+        ax3.plot(x, dynamic[type], label = f"lr={example['lr']}")
+
+  fig.suptitle(f"{model_name}: {title_dict[type]} ({n_classes} classes)")
+  ax0.legend()
+  ax1.legend()
+  ax2.legend()
+  ax3.legend()
+  plt.show()
