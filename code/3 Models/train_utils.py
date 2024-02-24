@@ -6,6 +6,7 @@ import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix
+import json
 
 import torch
 from torch.utils.data import Dataset
@@ -13,7 +14,7 @@ from torch.utils.data import Dataset
 import torchvision
 import torchvision.transforms.functional as F
 
-
+    
 class VideoDataset(Dataset):
     def __init__(self, video_labels, video_dir, IMG_SIZE, min_frame_count, classes, face_detection_model, ds_type = "test"):
         super(VideoDataset, self).__init__()
@@ -190,9 +191,37 @@ def validate_model(model, classes, epoch, criterion, optimizer, val_dataloader, 
                     'epoch': epoch,
                     'model_state_dict': model.state_dict(),
                     'optimizer_state_dict': optimizer.state_dict(),
-                    'classes': classes
+                    'classes': classes,
+                    'epoch':epoch
                 },
-                    f'{save_path}/{model_name}-{epoch}-Val_acc-{predict_acc:.3f}.pth')
+                    f'{save_path}/{model_name}-Val_acc-{predict_acc:.3f}.pth')
+    return predict_acc, best_acc
+  
+def validate_model_batched(model, classes, epoch, criterion, optimizer, val_dataloader, device, best_acc, save=True, save_path=None, model_name=None):
+    test_loss = list()
+    correct=0
+    total=0
+    model.eval()
+    for data, target in val_dataloader:
+        data, target = data.to(device), target.to(device)
+        with torch.no_grad():
+            output = model(data/255)
+        loss = criterion(output, target)
+        test_loss.append(loss)
+        pred = torch.argmax(output, 1)
+        correct += (pred == target).sum().float()
+        total += len(target)
+        predict_acc = correct / total
+    if save and predict_acc >= best_acc:
+        best_acc = predict_acc if predict_acc > best_acc else best_acc
+        torch.save({
+                    'epoch': epoch,
+                    'model_state_dict': model.state_dict(),
+                    'optimizer_state_dict': optimizer.state_dict(),
+                    'classes': classes,
+                    'epoch':epoch
+                },
+                    f'{save_path}/{model_name}-Val_acc-{predict_acc:.3f}.pth')
     return predict_acc, best_acc
     
 def train_model(model, optimizer, criterion, train_dataloader, device, scheduler=None):
@@ -208,8 +237,8 @@ def train_model(model, optimizer, criterion, train_dataloader, device, scheduler
         optimizer.step()
         total_loss.append(loss.item())
         #pbar.set_description(f'Train Epoch:{epoch}/{epoches} train_loss:{round(np.mean(total_loss), 4)}')
-        if scheduler is not None:
-            scheduler.step()
+    if scheduler is not None:
+        scheduler.step()
     return round(np.mean(total_loss), 4)
             
 
@@ -278,3 +307,59 @@ def classification_model_metrics(model, classes, dataloader, device, hm=True):
         plt.title('Confusion Matrix',fontsize=17)
         plt.show()
     print(f'Accuracy={accuracy}; Precision={precision}; Recall={recall}; F1={F1}')
+
+def draw_dynamic(data, batch_sizes, n_classes, model_folder, model_name, type = 'val_accuracy_dynamic'):
+  x = np.arange(1, 31, 1)
+  title_dict = {'val_accuracy_dynamic': 'Accuracy dynamic',
+                'train_loss_dynamic': 'Train Loss dynamic'}
+  color_dict = {
+      '3*10^(-3)': '#D5E8F7',
+      '3*10^(-4)': '#92C5EB',
+      '3*10^(-5)': '#0072BC',
+      '3*10^(-6)': '#FFAB40',
+      '3*10^(-7)': '#5D5D5D',
+      '3*10^(-8)': '#3E3E3E',
+  } 
+
+  linestyle_dict = {
+      '3*10^(-3)': '-',
+      '3*10^(-4)': '-',
+      '3*10^(-5)': '-',
+      '3*10^(-6)': '-',
+      '3*10^(-7)': '-',
+      '3*10^(-8)': '-',
+  }
+
+  def upd_len(some_list, target_size=30):
+    cl = len(some_list)
+    to_add = [0]*(target_size-cl)
+    return some_list + to_add
+
+  fig, (ax0, ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=4, sharex=True, figsize=(24, 4), sharey=True)
+    
+  if type == 'val_accuracy_dynamic':
+    ax0.set_ylim(0, 1)
+  ax0.set_title(f"batch_size = {batch_sizes[0]}")
+  ax1.set_title(f"batch_size = {batch_sizes[1]}")
+  ax2.set_title(f"batch_size = {batch_sizes[2]}")
+  ax3.set_title(f"batch_size = {batch_sizes[3]}")
+
+
+  for example in data:
+    with open(model_folder + example['filename'], 'r') as f:
+      dynamic = json.load(f)
+      if example['bs'] == batch_sizes[0]:
+        ax0.plot(x, upd_len(dynamic[type]), label = f"lr={example['lr']}", color = color_dict[example['lr']], linestyle = linestyle_dict[example['lr']])
+      elif example['bs'] == batch_sizes[1]:
+        ax1.plot(x, upd_len(dynamic[type]), label = f"lr={example['lr']}", color = color_dict[example['lr']], linestyle = linestyle_dict[example['lr']])
+      elif example['bs'] == batch_sizes[2]:
+        ax2.plot(x, upd_len(dynamic[type]), label = f"lr={example['lr']}", color = color_dict[example['lr']], linestyle = linestyle_dict[example['lr']])
+      elif example['bs'] == batch_sizes[3]:
+        ax3.plot(x, upd_len(dynamic[type]), label = f"lr={example['lr']}", color = color_dict[example['lr']], linestyle = linestyle_dict[example['lr']])
+
+  fig.suptitle(f"{model_name}: {title_dict[type]} ({n_classes} classes)")
+  ax0.legend()
+  ax1.legend()
+  ax2.legend()
+  ax3.legend()
+  plt.show()
