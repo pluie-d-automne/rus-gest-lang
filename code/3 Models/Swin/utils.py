@@ -312,6 +312,11 @@ def draw_dynamic(data, batch_sizes, n_classes, model_folder, model_name, type = 
   x = np.arange(1, 31, 1)
   title_dict = {'val_accuracy_dynamic': 'Accuracy dynamic',
                 'train_loss_dynamic': 'Train Loss dynamic'}
+    
+  def upd_len(some_list, target_size=30):
+    cl = len(some_list)
+    to_add = [0]*(target_size-cl)
+    return some_list + to_add
 
   fig, (ax0, ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=4, sharex=True, figsize=(24, 4), sharey=True)
 
@@ -325,13 +330,13 @@ def draw_dynamic(data, batch_sizes, n_classes, model_folder, model_name, type = 
     with open(model_folder + example['filename'], 'r') as f:
       dynamic = json.load(f)
       if example['bs'] == batch_sizes[0]:
-        ax0.plot(x, dynamic[type], label = f"lr={example['lr']}")
+        ax0.plot(x, upd_len(dynamic[type]), label = f"lr={example['lr']}")
       elif example['bs'] == batch_sizes[1]:
-        ax1.plot(x, dynamic[type], label = f"lr={example['lr']}")
+        ax1.plot(x, upd_len(dynamic[type]), label = f"lr={example['lr']}")
       elif example['bs'] == batch_sizes[2]:
-        ax2.plot(x, dynamic[type], label = f"lr={example['lr']}")
+        ax2.plot(x, upd_len(dynamic[type]), label = f"lr={example['lr']}")
       elif example['bs'] == batch_sizes[3]:
-        ax3.plot(x, dynamic[type], label = f"lr={example['lr']}")
+        ax3.plot(x, upd_len(dynamic[type]), label = f"lr={example['lr']}")
 
   fig.suptitle(f"{model_name}: {title_dict[type]} ({n_classes} classes)")
   ax0.legend()
