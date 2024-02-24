@@ -3,3 +3,4 @@
 *checkpoints
 code/logs/
 Demo/*
+**/__pycache__/
