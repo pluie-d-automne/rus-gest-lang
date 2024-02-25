@@ -46,13 +46,13 @@ class Bottleneck(nn.Module):
         
         self.conv1 = nn.Conv3d(inFeatures,outFeatures,kSize[0],stride[0],bias=False)
         self.bn1 = nn.BatchNorm3d(outFeatures)
-        self.relu = nn.ReLU(True)
+        self.relu1 = nn.ReLU(True)
         self.conv2 = nn.Conv3d(outFeatures,outFeatures,kSize[1],stride[1],padding=1,bias=False)
         self.bn2 = nn.BatchNorm3d(outFeatures)
-        self.relu = nn.ReLU(True)
+        self.relu2 = nn.ReLU(True)
         self.conv3 = nn.Conv3d(outFeatures,outFeatures*4,kSize[2],stride[2],bias=False)
         self.bn3 = nn.BatchNorm3d(outFeatures*4) 
-        self.relu = nn.ReLU(True)
+        self.relu3 = nn.ReLU(True)
         
 
         self.ds = dn_sample
@@ -67,11 +67,13 @@ class Bottleneck(nn.Module):
         x0 = x
         x = self.conv1(x)
         x = self.bn1(x)
+        x = self.relu1(x)
         x = self.conv2(x)
         x = self.bn2(x)
+        x = self.relu2(x)
         x = self.conv3(x)
         x = self.bn3(x)
-        x = self.relu(x)
+        x = self.relu3(x)
         if self.ds:
             x0 = self.downSample(x0)
         x = x+x0
