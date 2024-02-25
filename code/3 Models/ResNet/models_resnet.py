@@ -46,8 +46,10 @@ class Bottleneck(nn.Module):
         
         self.conv1 = nn.Conv3d(inFeatures,outFeatures,kSize[0],stride[0],bias=False)
         self.bn1 = nn.BatchNorm3d(outFeatures)
+        self.relu = nn.ReLU(True)
         self.conv2 = nn.Conv3d(outFeatures,outFeatures,kSize[1],stride[1],padding=1,bias=False)
         self.bn2 = nn.BatchNorm3d(outFeatures)
+        self.relu = nn.ReLU(True)
         self.conv3 = nn.Conv3d(outFeatures,outFeatures*4,kSize[2],stride[2],bias=False)
         self.bn3 = nn.BatchNorm3d(outFeatures*4) 
         self.relu = nn.ReLU(True)
@@ -81,7 +83,7 @@ class ResNet(nn.Module):
     def __init__(self,in_channels=3,num_residual_block=[3,4,6,3],num_class=1000,block_type='normal'):
         super(ResNet,self).__init__()
 
-        self.conv1 = nn.Conv3d(in_channels,64,7,2,3,bias=False)
+        self.conv1 = nn.Conv3d(in_channels,64,(1,7,7),(1,2,2,),(1,3,3),bias=False)
         self.bn1 = nn.BatchNorm3d(64)
         self.relu = nn.ReLU(True)
         self.maxpool = nn.MaxPool3d(3,2,1)

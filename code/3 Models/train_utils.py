@@ -227,6 +227,7 @@ def validate_model_batched(model, classes, epoch, criterion, optimizer, val_data
 def train_model(model, optimizer, criterion, train_dataloader, device, scheduler=None):
     #import tqdm
     total_loss = []
+    model.train()
     #pbar = tqdm(train_dataloader, desc=f'Train Epoch{epoch}/{epoches}')
     for data, target in train_dataloader:
         data, target = data.to(device), target.to(device)
