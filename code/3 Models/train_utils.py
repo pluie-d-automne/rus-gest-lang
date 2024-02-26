@@ -314,6 +314,7 @@ def draw_dynamic(data, batch_sizes, n_classes, model_folder, model_name, type = 
   title_dict = {'val_accuracy_dynamic': 'Accuracy dynamic',
                 'train_loss_dynamic': 'Train Loss dynamic'}
   color_dict = {
+      '3*10^(-2)': '#3E3E3E',
       '3*10^(-3)': '#D5E8F7',
       '3*10^(-4)': '#92C5EB',
       '3*10^(-5)': '#0072BC',
@@ -323,6 +324,7 @@ def draw_dynamic(data, batch_sizes, n_classes, model_folder, model_name, type = 
   } 
 
   linestyle_dict = {
+      '3*10^(-2)': '--',
       '3*10^(-3)': '-',
       '3*10^(-4)': '-',
       '3*10^(-5)': '-',
