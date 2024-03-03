@@ -224,13 +224,16 @@ def validate_model_batched(model, classes, epoch, criterion, optimizer, val_data
                     f'{save_path}/{model_name}-Val_acc-{predict_acc:.3f}.pth')
     return predict_acc, best_acc
     
-def train_model(model, optimizer, criterion, train_dataloader, device, scheduler=None):
+def train_model(model, optimizer, criterion, train_dataloader, device, scheduler=None, flip=False):
     #import tqdm
     total_loss = []
     model.train()
     #pbar = tqdm(train_dataloader, desc=f'Train Epoch{epoch}/{epoches}')
     for data, target in train_dataloader:
         data, target = data.to(device), target.to(device)
+        if flip:
+            if random.sample([True, False],1)[0]:
+                frames = torch.flip(frames, [4]) # Зеркальное отображение
         optimizer.zero_grad()  # Model Parameters Gradient Clear
         output = model(data/255)
         loss = criterion(output, target)
