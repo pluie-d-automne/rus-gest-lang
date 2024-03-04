@@ -13,6 +13,7 @@ from torch.utils.data import Dataset
 
 import torchvision
 import torchvision.transforms.functional as F
+from torchvision.transforms import v2
 
     
 class VideoDataset(Dataset):
@@ -224,16 +225,19 @@ def validate_model_batched(model, classes, epoch, criterion, optimizer, val_data
                     f'{save_path}/{model_name}-Val_acc-{predict_acc:.3f}.pth')
     return predict_acc, best_acc
     
-def train_model(model, optimizer, criterion, train_dataloader, device, scheduler=None, flip=False):
+def train_model(model, optimizer, criterion, train_dataloader, device, scheduler=None, flip=False, perspective_transform=False):
     #import tqdm
     total_loss = []
     model.train()
+    perspective_transformer = v2.RandomPerspective(distortion_scale=0.5, p=0.5)
     #pbar = tqdm(train_dataloader, desc=f'Train Epoch{epoch}/{epoches}')
     for data, target in train_dataloader:
         data, target = data.to(device), target.to(device)
         if flip:
             if random.sample([True, False],1)[0]:
-                frames = torch.flip(frames, [4]) # Зеркальное отображение
+                data = torch.flip(data, [4]) # Зеркальное отображение
+        if perspective_transform:
+            data = perspective_transformer(data)
         optimizer.zero_grad()  # Model Parameters Gradient Clear
         output = model(data/255)
         loss = criterion(output, target)
